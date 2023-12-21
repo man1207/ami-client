@@ -72,6 +72,7 @@ def proceed_event(event):
                         current_group += 1
 
 def handle_sigterm(*args):
+    sys.stdout.flush()
     raise KeyboardInterrupt()
 
 def event_notification(event, manager):
@@ -98,12 +99,21 @@ try:
         while not check_events():
             time.sleep(1)
 
-        manager.logoff()
+        sys.stdout.flush()
+        manager.close()
     except asterisk.manager.ManagerSocketException as e:
         print("Error connecting to manager: {}".format(e))
+        sys.stdout.flush()
+        os._exit(1)
     except asterisk.manager.ManagerAuthException as e:
         print("Error logging to manager: {}".format(e))
+        sys.stdout.flush()
+        os._exit(1)
     except asterisk.manager.ManagerException as e:
         print("Error: {}".format(e))
+        sys.stdout.flush()
+        os._exit(1)
 except (KeyboardInterrupt, SystemExit):
     manager.close()
+    sys.stdout.flush()
+    os._exit(1)
